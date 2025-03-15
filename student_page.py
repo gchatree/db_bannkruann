@@ -4,28 +4,7 @@ import json
 import os
 import bkn_fn
 
-def Exec_Sql(sql):
-    conn = sqlite3.connect("Bannkruann.db")
-    c = conn.cursor()
-    c.execute(sql)
-    result = c.fetchall()
-    if len(result) > 0:
-        attb = [d[0] for d in c.description]
-        jsonlist = [dict(zip(attb, item)) for item in result]
-    else:
-        jsonlist = result
-    conn.commit()
-    conn.close()
-    return jsonlist
 
-def max_id(data, id_name):
-    maxitem = ""
-    maxvalue = 0
-    for s in data:
-        if int(s[id_name]) >= maxvalue:
-            maxvalue = int(s[id_name])
-            maxitem = s
-    return maxitem 
 
 class AddressManager:
     def __init__(self, filepath="./assets/data/thailand_data.json"):
@@ -51,12 +30,31 @@ def containers(page):
     grey = bkn_fn.grey
     white = "#FFFFFF"
 
+    page.fonts = {
+        "THNiramit": "fonts/TH Niramit AS.ttf",
+        "THFahkwang": "fonts/TH Fahkwang.ttf",
+        "THK2DJuly8": "fonts/TH K2D July8.ttf",
+        "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
+        "THSarabun": "fonts/THSarabun.ttf",
+        "Charmonman": "fonts/Charmonman-Regular.ttf",
+        "Niramit":"fonts/Niramit-Regular.ttf",
+        "Srisakdi:":"fonts/Srisakdi-Regular.ttf"
+    }
+
+    # Choose which font to use for Thai text
+    menu_font = "THFahkwang"
+    Normal_font = "THSarabun"
+    Header_font = "Niramit"
+    btn_font = "THSarabun"
+
+
+
     # Fetch initial data from the database
     student_sql = "SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID ORDER BY S.S_ID DESC"
     parent_sql = "SELECT * FROM Parent ORDER BY P_ID DESC"
     global student_data
-    student_data = Exec_Sql(student_sql)
-    parent_data = Exec_Sql(parent_sql)
+    student_data = bkn_fn.Exec_Sql(student_sql)
+    parent_data = bkn_fn.Exec_Sql(parent_sql)
 
     # Global variable for current student, initialized as None if no data
     global current_student
@@ -343,7 +341,7 @@ def containers(page):
             controls=[
                 ft.Row(
                     controls=[
-                        ft.Text(f"รหัสผู้ปกครอง: {int(max_id(parent_data, 'P_ID')['P_ID']) + 1 if parent_data else 1}"),
+                        ft.Text(f"รหัสผู้ปกครอง: {int(bkn_fn.max_id(parent_data, 'P_ID')['P_ID']) + 1 if parent_data else 1}"),
                         search_parent_btn,
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -616,14 +614,14 @@ def containers(page):
                         S_Tel = '{s_tel_input.value}' 
                     WHERE S_ID = {student_id_input.value}
                 """
-                Exec_Sql(sql)
+                bkn_fn.Exec_Sql(sql)
             else:  # Adding a new student
-                all_students = Exec_Sql("SELECT * FROM Student ORDER BY S_ID DESC")
-                next_s_id = int(max_id(all_students, "S_ID")["S_ID"]) + 1 if all_students else 1
+                all_students = bkn_fn.Exec_Sql("SELECT * FROM Student ORDER BY S_ID DESC")
+                next_s_id = int(bkn_fn.max_id(all_students, "S_ID")["S_ID"]) + 1 if all_students else 1
                 
                 if current_student["P_ID"] is None:  # No parent selected, create new
-                    all_parents = Exec_Sql("SELECT * FROM Parent ORDER BY P_ID DESC")
-                    next_p_id = int(max_id(all_parents, "P_ID")["P_ID"]) + 1 if all_parents else 1
+                    all_parents = bkn_fn.Exec_Sql("SELECT * FROM Parent ORDER BY P_ID DESC")
+                    next_p_id = int(bkn_fn.max_id(all_parents, "P_ID")["P_ID"]) + 1 if all_parents else 1
                     parent_sql = f"""
                         INSERT INTO Parent (P_ID, M_Name, M_SurName, M_Tel, line, facebook, H_Adr, H_Mu, H_Tum, H_Amp, H_Prov, H_Post)
                         VALUES ({next_p_id}, '{parent_name_input.value}', '{parent_surname_input.value}', 
@@ -633,7 +631,7 @@ def containers(page):
                                 '{add_amp_input.value or ''}', '{add_prov_input.value or ''}', 
                                 '{add_post_input.value}')
                     """
-                    Exec_Sql(parent_sql)
+                    bkn_fn.Exec_Sql(parent_sql)
                     p_id_to_use = next_p_id
                 else:  # Use existing parent
                     p_id_to_use = current_student["P_ID"]
@@ -644,11 +642,11 @@ def containers(page):
                             '{school_input.value}', '{class_input.value}', '{s_tel_input.value}', 
                             {p_id_to_use})
                 """
-                Exec_Sql(student_sql)
+                bkn_fn.Exec_Sql(student_sql)
                 
                 student_id_input.value = str(next_s_id)
 
-            student_data = Exec_Sql("SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID ORDER BY S.S_ID DESC")
+            student_data = bkn_fn.Exec_Sql("SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID ORDER BY S.S_ID DESC")
             current_student = next((s for s in student_data if s["S_ID"] == int(student_id_input.value)), None) if student_id_input.value else student_data[0] if student_data else None
             
             edit_save_student_btn.text = "Edit"
@@ -689,9 +687,9 @@ def containers(page):
                     H_Post = '{parent_post_input.value}' 
                 WHERE P_ID = {parent_id}
             """
-            Exec_Sql(sql)
+            bkn_fn.Exec_Sql(sql)
             
-            student_data = Exec_Sql("SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID ORDER BY S.S_ID DESC")
+            student_data = bkn_fn.Exec_Sql("SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID ORDER BY S.S_ID DESC")
             current_student = next((s for s in student_data if s["S_ID"] == int(student_id_input.value)), None)
             
             edit_save_parent_btn.text = "Edit"
@@ -708,7 +706,7 @@ def containers(page):
             page.update()
             return
         sql = f"SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID AND S.S_ID = {student_id}"
-        result = Exec_Sql(sql)
+        result = bkn_fn.Exec_Sql(sql)
         global current_student
         current_student = result[0] if result else None
         if current_student:
@@ -817,11 +815,11 @@ def containers(page):
     def add_student(e):
         global current_student
         
-        all_students = Exec_Sql("SELECT * FROM Student ORDER BY S_ID DESC")
-        all_parents = Exec_Sql("SELECT * FROM Parent ORDER BY P_ID DESC")
+        all_students = bkn_fn.Exec_Sql("SELECT * FROM Student ORDER BY S_ID DESC")
+        all_parents = bkn_fn.Exec_Sql("SELECT * FROM Parent ORDER BY P_ID DESC")
         
-        next_s_id = int(max_id(all_students, "S_ID")["S_ID"]) + 1 if all_students else 1
-        next_p_id = int(max_id(all_parents, "P_ID")["P_ID"]) + 1 if all_parents else 1
+        next_s_id = int(bkn_fn.max_id(all_students, "S_ID")["S_ID"]) + 1 if all_students else 1
+        next_p_id = int(bkn_fn.max_id(all_parents, "P_ID")["P_ID"]) + 1 if all_parents else 1
         
         current_student = {
             "S_ID": None,
@@ -905,7 +903,7 @@ def containers(page):
                     bgcolor=bkn_fn.navy_blue,
                     height=40,
                     content=ft.Row(
-                        [ft.Text("::: ข้อมูลนักเรียน :::", color=bkn_fn.yellow, size=18)],
+                        [ft.Text("::: ข้อมูลนักเรียน :::", color=bkn_fn.yellow, size=18,font_family=Header_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),
@@ -927,7 +925,7 @@ def containers(page):
                     bgcolor=yellow,
                     height=40,
                     content=ft.Row(
-                        [ft.Text("::: ข้อมูลผู้ปกครอง :::", color=navy_blue, size=18)],
+                        [ft.Text("::: ข้อมูลผู้ปกครอง :::", color=navy_blue, size=18,font_family=Header_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),

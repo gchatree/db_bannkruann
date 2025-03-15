@@ -25,11 +25,16 @@ def main(page: ft.Page):
         "THK2DJuly8": "fonts/TH K2D July8.ttf",
         "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
         "THSarabun": "fonts/THSarabun.ttf",
-        "Charmonman": "fonts/Charmonman-Regular.ttf"
+        "Charmonman": "fonts/Charmonman-Regular.ttf",
+        "Niramit":"fonts/Niramit-Regular.ttf",
+        "Srisakdi:":"fonts/Srisakdi-Regular.ttf"
+
     }
     
     # Choose which font to use for Thai text
     menu_font = "THFahkwang"
+    Normal_font = "THSarabun"
+    Header_font = "Charmonman"
     btn_font = "THSarabun"
     # Local image path
     path = os.path.abspath('')
@@ -63,12 +68,14 @@ def main(page: ft.Page):
                             size=24,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
+                            font_family= Header_font,
                         ),
                         ft.Text(
                             english_subtitle,
                             size=32,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
+                            font_family= Header_font,
                         ),
                         ft.Container(height=40),
                         ft.Container(
