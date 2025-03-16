@@ -5,29 +5,11 @@ import bkn_fn
 TEXT_SIZE = 14
 FIELD_HEIGHT = 40
 
-# Database function with error handling
-def Exec_Sql(sql):
-    try:
-        conn = sqlite3.connect("Bannkruann.db") 
-        c = conn.cursor()
-        c.execute(sql)
-        result = c.fetchall()
-        if len(result) > 0:
-            attb = [d[0] for d in c.description]
-            jsonlist = [dict(zip(attb, item)) for item in result]
-        else:
-            jsonlist = result
-        conn.commit()
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        jsonlist = []
-    finally:
-        conn.close()
-    return jsonlist
 
 def containers(page):
+    page.fonts = bkn_fn.pagefonts
     # Fetch initial data from database
-    course_data = Exec_Sql("SELECT * FROM Course ORDER BY ID DESC")
+    course_data = bkn_fn.Exec_Sql("SELECT * FROM Course ORDER BY ID DESC")
     
     # State variables
     editing_index = None
@@ -56,7 +38,7 @@ def containers(page):
     # Add new record function
     def save_new_record(e):
         nonlocal editing_index
-        max_id_result = Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
+        max_id_result = bkn_fn.Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
         max_id = max_id_result[0]["max_id"] if max_id_result and max_id_result[0]["max_id"] is not None else 0
         new_id = str(max_id + 1)
         
@@ -70,7 +52,7 @@ def containers(page):
             "Cost": cost_field.value,
         }
         sql = f"INSERT INTO Course (ID, C_ID, Class, Day, Period, Subject, Cost) VALUES ('{new_id}', '{new_record['C_ID']}', '{new_record['Class']}', '{new_record['Day']}', '{new_record['Period']}', '{new_record['Subject']}', '{new_record['Cost']}')"
-        Exec_Sql(sql)
+        bkn_fn.Exec_Sql(sql)
         
         course_data.insert(0, new_record)
         filtered_data.insert(0, new_record)
@@ -111,7 +93,7 @@ def containers(page):
         filtered_data[index]["Subject"] = table.rows[index].cells[4].content.value
         filtered_data[index]["Cost"] = table.rows[index].cells[5].content.value
         sql = f"UPDATE Course SET C_ID = '{filtered_data[index]['C_ID']}', Class = '{filtered_data[index]['Class']}', Day = '{filtered_data[index]['Day']}', Period = '{filtered_data[index]['Period']}', Subject = '{filtered_data[index]['Subject']}', Cost = '{filtered_data[index]['Cost']}' WHERE ID = '{filtered_data[index]['ID']}'"
-        Exec_Sql(sql)
+        bkn_fn.Exec_Sql(sql)
         for i, item in enumerate(course_data):
             if item["ID"] == filtered_data[index]["ID"]:
                 course_data[i] = filtered_data[index].copy()
@@ -122,12 +104,12 @@ def containers(page):
     def delete_record(e, index):
         deleted_item = filtered_data.pop(index)
         sql = f"DELETE FROM Course WHERE ID = '{deleted_item['ID']}'"
-        Exec_Sql(sql)
+        bkn_fn.Exec_Sql(sql)
         course_data[:] = [item for item in course_data if item["ID"] != deleted_item["ID"]]
         refresh_table()
 
     def duplicate_record(e, index):
-        max_id_result = Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
+        max_id_result = bkn_fn.Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
         max_id = max_id_result[0]["max_id"] if max_id_result and max_id_result[0]["max_id"] is not None else 0
         new_id = str(max_id + 1)
         
@@ -135,7 +117,7 @@ def containers(page):
         new_record["ID"] = new_id
         new_record["C_ID"] = f"{new_record['C_ID']}_COPY"
         sql = f"INSERT INTO Course (ID, C_ID, Class, Day, Period, Subject, Cost) VALUES ('{new_id}', '{new_record['C_ID']}', '{new_record['Class']}', '{new_record['Day']}', '{new_record['Period']}', '{new_record['Subject']}', '{new_record['Cost']}')"
-        Exec_Sql(sql)
+        bkn_fn.Exec_Sql(sql)
         
         course_data.insert(0, new_record)
         filtered_data.insert(0, new_record)
@@ -253,7 +235,7 @@ def containers(page):
                         bgcolor=bkn_fn.navy_blue,
                         height=40,
                         content=ft.Row(
-                        [ft.Text("::: การจัดการคอร์สเรียน :::", color=bkn_fn.yellow, size=18)],
+                        [ft.Text("::: การจัดการคอร์สเรียน :::", color=bkn_fn.yellow, size=22,font_family=bkn_fn.menu_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),
@@ -272,7 +254,7 @@ def containers(page):
                         bgcolor=bkn_fn.yellow,
                         height=40,
                         content=ft.Row(
-                        [ft.Text("::: ข้อมูลคอร์สเรียน :::", color=bkn_fn.navy_blue, size=18)],
+                        [ft.Text("::: ข้อมูลคอร์สเรียน :::", color=bkn_fn.navy_blue, size=22,font_family=bkn_fn.menu_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),

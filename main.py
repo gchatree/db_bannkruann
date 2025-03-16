@@ -19,23 +19,10 @@ def main(page: ft.Page):
     page.window.center()
 
     # Font definitions - register Thai fonts from assets/fonts folder
-    page.fonts = {
-        "THNiramit": "fonts/TH Niramit AS.ttf",
-        "THFahkwang": "fonts/TH Fahkwang.ttf",
-        "THK2DJuly8": "fonts/TH K2D July8.ttf",
-        "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
-        "THSarabun": "fonts/THSarabun.ttf",
-        "Charmonman": "fonts/Charmonman-Regular.ttf",
-        "Niramit":"fonts/Niramit-Regular.ttf",
-        "Srisakdi:":"fonts/Srisakdi-Regular.ttf"
-
-    }
+    page.fonts = bkn_fn.pagefonts
     
     # Choose which font to use for Thai text
-    menu_font = "THFahkwang"
-    Normal_font = "THSarabun"
-    Header_font = "Charmonman"
-    btn_font = "THSarabun"
+
     # Local image path
     path = os.path.abspath('')
     logo_path = "/images/bannAnn.png"
@@ -68,14 +55,14 @@ def main(page: ft.Page):
                             size=24,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
-                            font_family= Header_font,
+                            font_family= bkn_fn.Header_font,
                         ),
                         ft.Text(
                             english_subtitle,
                             size=32,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
-                            font_family= Header_font,
+                            font_family= bkn_fn.Header_font,
                         ),
                         ft.Container(height=40),
                         ft.Container(
@@ -184,7 +171,7 @@ def main(page: ft.Page):
                             "โรงเรียนกวดวิชาบ้านครูแอน",
                             color="white",
                             size=20,
-                            font_family=menu_font,
+                            font_family=bkn_fn.menu_font,
                         )
                     ])
                 ),

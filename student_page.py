@@ -30,24 +30,7 @@ def containers(page):
     grey = bkn_fn.grey
     white = "#FFFFFF"
 
-    page.fonts = {
-        "THNiramit": "fonts/TH Niramit AS.ttf",
-        "THFahkwang": "fonts/TH Fahkwang.ttf",
-        "THK2DJuly8": "fonts/TH K2D July8.ttf",
-        "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
-        "THSarabun": "fonts/THSarabun.ttf",
-        "Charmonman": "fonts/Charmonman-Regular.ttf",
-        "Niramit":"fonts/Niramit-Regular.ttf",
-        "Srisakdi:":"fonts/Srisakdi-Regular.ttf"
-    }
-
-    # Choose which font to use for Thai text
-    menu_font = "THFahkwang"
-    Normal_font = "THSarabun"
-    Header_font = "Niramit"
-    btn_font = "THSarabun"
-
-
+    page.fonts = bkn_fn.pagefonts
 
     # Fetch initial data from the database
     student_sql = "SELECT * FROM Student as S, Parent as P WHERE S.P_ID = P.P_ID ORDER BY S.S_ID DESC"
@@ -903,7 +886,7 @@ def containers(page):
                     bgcolor=bkn_fn.navy_blue,
                     height=40,
                     content=ft.Row(
-                        [ft.Text("::: ข้อมูลนักเรียน :::", color=bkn_fn.yellow, size=18,font_family=Header_font)],
+                        [ft.Text("::: ข้อมูลนักเรียน :::", color=bkn_fn.yellow, size=22,font_family=bkn_fn.menu_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),
@@ -925,7 +908,7 @@ def containers(page):
                     bgcolor=yellow,
                     height=40,
                     content=ft.Row(
-                        [ft.Text("::: ข้อมูลผู้ปกครอง :::", color=navy_blue, size=18,font_family=Header_font)],
+                        [ft.Text("::: ข้อมูลผู้ปกครอง :::", color=navy_blue, size=22,font_family=bkn_fn.menu_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),
