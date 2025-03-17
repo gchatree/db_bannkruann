@@ -109,7 +109,7 @@ def main(page: ft.Page):
         if page_name == "Home":
             content_container.content = home_content
         elif page_name == "Students":
-            content_container.content = students_content
+            content_container.content = ft.Column ([students_content],scroll='auto')
         elif page_name == "Courses":
             content_container.content = courses_content
         elif page_name == "Enroll":
