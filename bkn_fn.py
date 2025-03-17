@@ -82,7 +82,8 @@ def receiptdocx(rid):
     doc.render(d[0])
     doc.save(f'receipt/{rid}.docx')
     
-    open_docx_file (f'receipt/{rid}.docx')      
+    #open_docx_file (f'receipt/{rid}.docx')   
+    open_pdf_receipt_no(f'{rid}')   
 
 def jsontolist (url):
     x = requests.get(url)
