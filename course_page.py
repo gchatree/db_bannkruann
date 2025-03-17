@@ -186,7 +186,7 @@ def containers(page):
     cost_field = ft.TextField(label="Cost", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
 
     # Add button and container
-    add_button = ft.ElevatedButton("Add Course", on_click=toggle_add_container, bgcolor=bkn_fn.navy_blue,icon=ft.icons.ADD ,icon_color=bkn_fn.yellow, color=bkn_fn.yellow, height=FIELD_HEIGHT)
+    add_button = ft.ElevatedButton("Add Course", on_click=toggle_add_container, bgcolor=bkn_fn.navy_blue,icon=ft.icons.ADD ,icon_color=bkn_fn.yellow, color=bkn_fn.yellow)
     add_container = ft.Container(
         content=ft.Column(
             [
@@ -204,7 +204,7 @@ def containers(page):
                         period_field,
                         subject_field,
                         cost_field,
-                        ft.ElevatedButton("Save",icon=ft.icons.SAVE,width=100,icon_color=bkn_fn.yellow , on_click=save_new_record, bgcolor=bkn_fn.navy_blue, color=bkn_fn.yellow, height=FIELD_HEIGHT),
+                        ft.ElevatedButton("Save",icon=ft.icons.SAVE,width=100,icon_color=bkn_fn.yellow , on_click=save_new_record, bgcolor=bkn_fn.navy_blue, color=bkn_fn.yellow),
                     ],
                     spacing=10,
                 ),
@@ -245,6 +245,7 @@ def containers(page):
                 ],
                 spacing=20,
                 scroll=ft.ScrollMode.AUTO,
+                
             ),
         ),
         ft.Container(
