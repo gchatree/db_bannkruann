@@ -20,7 +20,7 @@ def main(page: ft.Page):
 
     # Font definitions - register Thai fonts from assets/fonts folder
     page.fonts = bkn_fn.pagefonts
-    
+    page.theme = ft.Theme(font_family=bkn_fn.Normal_font)  
     # Choose which font to use for Thai text
 
     # Local image path
