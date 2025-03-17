@@ -18,7 +18,7 @@ pagefonts = {
         "THFahkwang": "fonts/TH Fahkwang.ttf",
         "THK2DJuly8": "fonts/TH K2D July8.ttf",
         "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
-        "THSarabun": "fonts/THSarabun.ttf",
+        "THSarabun": "fonts/Sarabun-Regular.ttf",
         "Charmonman": "fonts/Charmonman-Regular.ttf",
         "Niramit":"fonts/Niramit-Regular.ttf",
         "Srisakdi:":"fonts/Srisakdi-Regular.ttf"
