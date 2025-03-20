@@ -5,7 +5,7 @@ import course_page
 import enroll_page
 import payment_page
 import bkn_fn
-# import receipt_page
+import class_page
 
 
 def main(page: ft.Page):
@@ -19,18 +19,10 @@ def main(page: ft.Page):
     page.window.center()
 
     # Font definitions - register Thai fonts from assets/fonts folder
-    page.fonts = {
-        "THNiramit": "fonts/TH Niramit AS.ttf",
-        "THFahkwang": "fonts/TH Fahkwang.ttf",
-        "THK2DJuly8": "fonts/TH K2D July8.ttf",
-        "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
-        "THSarabun": "fonts/THSarabun.ttf",
-        "Charmonman": "fonts/Charmonman-Regular.ttf"
-    }
-    
+    page.fonts = bkn_fn.pagefonts
+    page.theme = ft.Theme(font_family=bkn_fn.Normal_font)  
     # Choose which font to use for Thai text
-    menu_font = "THFahkwang"
-    btn_font = "THSarabun"
+
     # Local image path
     path = os.path.abspath('')
     logo_path = "/images/bannAnn.png"
@@ -42,7 +34,7 @@ def main(page: ft.Page):
         "Courses": "ระบบจัดการข้อมูลและการเงิน : Courses",
         "Enroll": "ระบบจัดการข้อมูลและการเงิน : Enroll",
         "Payment": "ระบบจัดการข้อมูลและการเงิน : Payment",
-        "Receipt": "ระบบจัดการข้อมูลและการเงิน : Receipt",
+        "Class Room": "ระบบจัดการข้อมูลและการเงิน : Class Room",
     }
     
     # Current page tracker
@@ -63,12 +55,14 @@ def main(page: ft.Page):
                             size=24,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
+                            font_family= bkn_fn.Header_font,
                         ),
                         ft.Text(
                             english_subtitle,
                             size=32,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
+                            font_family= bkn_fn.Header_font,
                         ),
                         ft.Container(height=40),
                         ft.Container(
@@ -90,8 +84,8 @@ def main(page: ft.Page):
             return enroll_page.containers(page)
         elif page_name == "Payment":
             return payment_page.containers(page)
-        # elif page_name == "Receipt":
-        #     return 
+        elif page_name == "ClassRoom":
+             return class_page.containers(page)
 
     # Create content containers for each page
     home_content = create_page_content("Home")
@@ -99,7 +93,7 @@ def main(page: ft.Page):
     courses_content = create_page_content("Courses")
     enroll_content = create_page_content("Enroll")
     payment_content = create_page_content("Payment")
-    receipt_content = create_page_content("Receipt")
+    Class_Room_content = create_page_content("ClassRoom")
     
     # Container to hold the current page content
     content_container = ft.Container(
@@ -115,15 +109,15 @@ def main(page: ft.Page):
         if page_name == "Home":
             content_container.content = home_content
         elif page_name == "Students":
-            content_container.content = students_content
+            content_container.content = ft.Column ([students_content],scroll='auto')
         elif page_name == "Courses":
             content_container.content = courses_content
         elif page_name == "Enroll":
             content_container.content = enroll_content
         elif page_name == "Payment":
             content_container.content = payment_content
-        elif page_name == "Receipt":
-            content_container.content = receipt_content
+        elif page_name == "ClassRoom":
+            content_container.content = ft.Column ([Class_Room_content],scroll='auto')
         for button in sidebar.content.controls[1:]:
             text = button.content.controls[1].value
             is_selected = text == page_name
@@ -177,7 +171,7 @@ def main(page: ft.Page):
                             "โรงเรียนกวดวิชาบ้านครูแอน",
                             color="white",
                             size=20,
-                            font_family=menu_font,
+                            font_family=bkn_fn.menu_font,
                         )
                     ])
                 ),
@@ -186,7 +180,7 @@ def main(page: ft.Page):
                 create_menu_button(ft.Icons.SCHOOL, "Courses"),
                 create_menu_button(ft.Icons.APP_REGISTRATION, "Enroll"), 
                 create_menu_button(ft.Icons.CREDIT_CARD, "Payment"),
-                create_menu_button(ft.Icons.RECEIPT, "Receipt"),
+                create_menu_button(ft.Icons.ROOM, "ClassRoom"),
             ]
         )
     )

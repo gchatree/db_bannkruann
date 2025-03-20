@@ -13,6 +13,22 @@ grey = "#E0E0E0"
 white = "#FFFFFF"
 darkgrey = "#A9A9A9"
 
+pagefonts = {
+        "THNiramit": "fonts/TH Niramit AS.ttf",
+        "THFahkwang": "fonts/TH Fahkwang.ttf",
+        "THK2DJuly8": "fonts/TH K2D July8.ttf",
+        "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
+        "THSarabun": "fonts/Sarabun-Regular.ttf",
+        "Charmonman": "fonts/Charmonman-Regular.ttf",
+        "Niramit":"fonts/Niramit-Regular.ttf",
+        "Srisakdi:":"fonts/Srisakdi-Regular.ttf"
+    }
+    
+menu_font = "THFahkwang"
+Normal_font = "THSarabun"
+Header_font = "Charmonman"
+btn_font = "THNiramit"
+
 def open_pdf_receipt_no(rid):
     ospth = os.getcwd()
     pdf_path = f"{ospth}/receipt/{rid}.docx"
@@ -66,7 +82,8 @@ def receiptdocx(rid):
     doc.render(d[0])
     doc.save(f'receipt/{rid}.docx')
     
-    open_docx_file (f'receipt/{rid}.docx')      
+    #open_docx_file (f'receipt/{rid}.docx')   
+    open_pdf_receipt_no(f'{rid}')   
 
 def jsontolist (url):
     x = requests.get(url)

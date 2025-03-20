@@ -6,6 +6,8 @@ import bkn_fn
 import payment_page
 
 def containers(page):
+
+    page.fonts = bkn_fn.pagefonts
     # Define color scheme
     navy_blue = bkn_fn.navy_blue
     yellow = bkn_fn.yellow
@@ -325,13 +327,13 @@ def containers(page):
                     spacing=0,
                     controls=[
                         ft.Container(
-                            height=40,
-                            padding=ft.padding.only(10, 10, 10, 10),
+                            #height=40,
+                            #padding=ft.padding.only(10, 10, 10, 10),
                             bgcolor=navy_blue,
                             content=ft.Column(
                                 spacing=0,
                                 controls=[ft.Row(
-                                    [ft.Text(":::  เลือกคอร์ส  :::", color=yellow, size=18)],
+                                    [ft.Text(":::  เลือกคอร์ส  :::", color=yellow, size=22,font_family=bkn_fn.menu_font)],
                                     alignment=ft.MainAxisAlignment.CENTER
                                 )]
                             )
@@ -375,12 +377,12 @@ def containers(page):
                     controls=[
                         ft.Container(
                             bgcolor=yellow,
-                            height=40,
-                            padding=ft.padding.only(10, 0, 10, 10),
+                            # height=40,
+                            # padding=ft.padding.only(10, 0, 10, 10),
                             content=ft.Column(
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 controls=[ft.Row(
-                                    [ft.Text(":::: ข้อมูลการชำระเงิน ::::", expand=True, size=18, text_align="center")]
+                                    [ft.Text(":::: ข้อมูลการชำระเงิน ::::", expand=True, size=22,font_family=bkn_fn.menu_font, text_align="center")]
                                 )]
                             )
                         ),
