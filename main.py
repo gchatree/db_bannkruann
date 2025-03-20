@@ -5,7 +5,7 @@ import course_page
 import enroll_page
 import payment_page
 import bkn_fn
-# import receipt_page
+import class_page
 
 
 def main(page: ft.Page):
@@ -34,7 +34,7 @@ def main(page: ft.Page):
         "Courses": "ระบบจัดการข้อมูลและการเงิน : Courses",
         "Enroll": "ระบบจัดการข้อมูลและการเงิน : Enroll",
         "Payment": "ระบบจัดการข้อมูลและการเงิน : Payment",
-        "Receipt": "ระบบจัดการข้อมูลและการเงิน : Receipt",
+        "Class Room": "ระบบจัดการข้อมูลและการเงิน : Class Room",
     }
     
     # Current page tracker
@@ -84,8 +84,8 @@ def main(page: ft.Page):
             return enroll_page.containers(page)
         elif page_name == "Payment":
             return payment_page.containers(page)
-        # elif page_name == "Receipt":
-        #     return 
+        elif page_name == "ClassRoom":
+             return class_page.containers(page)
 
     # Create content containers for each page
     home_content = create_page_content("Home")
@@ -93,7 +93,7 @@ def main(page: ft.Page):
     courses_content = create_page_content("Courses")
     enroll_content = create_page_content("Enroll")
     payment_content = create_page_content("Payment")
-    receipt_content = create_page_content("Receipt")
+    Class_Room_content = create_page_content("ClassRoom")
     
     # Container to hold the current page content
     content_container = ft.Container(
@@ -116,8 +116,8 @@ def main(page: ft.Page):
             content_container.content = enroll_content
         elif page_name == "Payment":
             content_container.content = payment_content
-        elif page_name == "Receipt":
-            content_container.content = receipt_content
+        elif page_name == "ClassRoom":
+            content_container.content = ft.Column ([Class_Room_content],scroll='auto')
         for button in sidebar.content.controls[1:]:
             text = button.content.controls[1].value
             is_selected = text == page_name
@@ -180,7 +180,7 @@ def main(page: ft.Page):
                 create_menu_button(ft.Icons.SCHOOL, "Courses"),
                 create_menu_button(ft.Icons.APP_REGISTRATION, "Enroll"), 
                 create_menu_button(ft.Icons.CREDIT_CARD, "Payment"),
-                create_menu_button(ft.Icons.RECEIPT, "Receipt"),
+                create_menu_button(ft.Icons.ROOM, "ClassRoom"),
             ]
         )
     )
