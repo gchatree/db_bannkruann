@@ -1,8 +1,8 @@
 import flet as ft
-import sqlite3
 import bkn_fn
 import pandas as pd
-
+import openpyxl
+from openpyxl.utils import get_column_letter
 # Constants
 TEXT_SIZE = 14
 FIELD_HEIGHT = 40
@@ -68,40 +68,60 @@ def containers(page):
             filtered_data = course_data.copy()
         refresh_table()
 
-    # Function to export student list to Excel
-    def save_to_excel(e):
-        if e.path:
-            try:
-                # Create a DataFrame from the current student list
-                df = pd.DataFrame(current_students, columns=["Name", "SurName", "Nick"])
-                # Rename columns for the Excel file (in Thai)
-                df.columns = ["ชื่อ", "นามสกุล", "ชื่อเล่น"]
-                # Save the DataFrame to an Excel file
-                output_path = f"{e.path}.xlsx"
-                df.to_excel(output_path, index=False)
-                # Update and show the SnackBar with success message
-                snack_bar.content = ft.Text(f"Exported student list to {output_path}")
-                snack_bar.bgcolor = ft.colors.GREEN_700
-                snack_bar.open = True
-                page.update()
-            except ModuleNotFoundError as e:
-                # Update and show the SnackBar with openpyxl error message
-                snack_bar.content = ft.Text("Error: Please install 'openpyxl' to export to Excel. Run 'pip install openpyxl'")
-                snack_bar.bgcolor = ft.colors.RED_700
-                snack_bar.open = True
-                page.update()
-            except Exception as e:
-                # Update and show the SnackBar with general error message
-                snack_bar.content = ft.Text(f"Error exporting to Excel: {str(e)}")
-                snack_bar.bgcolor = ft.colors.RED_700
-                snack_bar.open = True
-                page.update()
-        else:
-            # Update and show the SnackBar with cancellation message
-            snack_bar.content = ft.Text("Export cancelled")
+    
+    
+    # Function to save student list to Excel
+    def save_to_excel(file_name):
+        try:
+            # Create a DataFrame from the current student list with all columns
+            df = pd.DataFrame(current_students)  # No explicit columns, use all data
+            # Rename all columns to Thai (adjust as needed)
+            df.columns = ["รหัสนักเรียน", "ชื่อ", "นามสกุล", "ชื่อเล่น", "โรงเรียน", "โทรศัพท์นักเรียน", "โทรศัพท์ผู้ปกครอง"]
+            # Save the DataFrame to an Excel file
+            output_path = f"{file_name}.xlsx"
+            df.to_excel(output_path, index=False)
+
+            wb = openpyxl.load_workbook(output_path)
+            ws = wb.active
+            course_info = next((item for item in course_data if item["C_ID"] == last_clicked_c_id), None)
+            if course_info:
+                c_id = course_info["C_ID"]
+                class_name = course_info["Class"]
+            else:
+                c_id = "Unknown"
+                class_name = "Unknown"
+
+            ws.insert_rows(1)    
+            ws.insert_rows(1)
+            # Add C_ID and Class to the first row
+            ws[f"A1"] = "ห้องเรียน   :"
+            ws[f"B1"] = class_name
+
+            ws.insert_rows(1)
+            # Add C_ID and Class to the first row
+            ws[f"A1"] = "รหัสคอร์ส   :"
+            ws[f"B1"] = c_id
+
+            wb.save(output_path)
+
+            # Update and show the SnackBar with success message
+            snack_bar.content = ft.Text(f"Exported student list to {output_path}")
+            snack_bar.bgcolor = ft.colors.GREEN_700
+            snack_bar.open = True
+            page.update()
+            bkn_fn.open_excle_receipt_sum(output_path)
+        except ModuleNotFoundError as e:
+            snack_bar.content = ft.Text("Error: Please install 'openpyxl' to export to Excel. Run 'pip install openpyxl'")
             snack_bar.bgcolor = ft.colors.RED_700
             snack_bar.open = True
             page.update()
+        except Exception as e:
+            snack_bar.content = ft.Text(f"Error exporting to Excel: {str(e)}")
+            snack_bar.bgcolor = ft.colors.RED_700
+            snack_bar.open = True
+            page.update()
+
+       
 
     # Function to initiate the export process
     def export_to_excel():
@@ -111,11 +131,9 @@ def containers(page):
             snack_bar.open = True
             page.update()
             return
-        # Open the file picker to let the user choose a save location
-        file_picker.save_file(
-            file_name=f"students_course_{last_clicked_c_id}.xlsx",
-            allowed_extensions=["xlsx"]
-        )
+        # Directly save the file to "student_in_classroom.xlsx"
+        save_to_excel("student_in_classroom")
+
 
     # Function to fetch and display student list for a given C_ID
     def show_student_list(c_id):
@@ -135,13 +153,21 @@ def containers(page):
         # Since C_ID is a text field, we wrap it in single quotes
         student_query = f"""
         SELECT 
-            s.S_ID,
-            s.Name,
-            s.SurName,
-            s.Nick
-        FROM Student s
-        JOIN Enroll e ON s.S_ID = e.S_ID
-        WHERE e.C_ID = '{c_id}'
+            a.S_ID,
+            a.Name,
+            a.SurName,
+            a.Nick,
+            a.school,
+            a.S_Tel,
+            p.M_Tel 
+        FROM Student a, Parent p 
+        WHERE (a.P_ID = p.P_ID) AND (a.S_ID IN (
+             SELECT 
+                s.S_ID
+            FROM Student s
+            JOIN Enroll e ON s.S_ID = e.S_ID
+            WHERE e.C_ID = '{c_id}'
+        ))
         """
         students = bkn_fn.Exec_Sql(student_query)  # Pass only the query string
 
@@ -165,6 +191,9 @@ def containers(page):
         ft.DataColumn(ft.Text("ชื่อ", size=TEXT_SIZE)),
         ft.DataColumn(ft.Text("นามสกุล", size=TEXT_SIZE)),
         ft.DataColumn(ft.Text("ชื่อเล่น", size=TEXT_SIZE)),
+        ft.DataColumn(ft.Text("โรงเรียน", size=TEXT_SIZE)),
+        ft.DataColumn(ft.Text("Tel นักเรียน", size=TEXT_SIZE)),
+        ft.DataColumn(ft.Text("Tel ผู้ปกครอง", size=TEXT_SIZE)),
     ],
     rows=[
         ft.DataRow(
@@ -173,6 +202,9 @@ def containers(page):
                 ft.DataCell(ft.Text(student["Name"], size=TEXT_SIZE)),
                 ft.DataCell(ft.Text(student["SurName"], size=TEXT_SIZE)),
                 ft.DataCell(ft.Text(student["Nick"], size=TEXT_SIZE)),
+                ft.DataCell(ft.Text(student["School"], size=TEXT_SIZE)),
+                ft.DataCell(ft.Text(student["S_Tel"], size=TEXT_SIZE)),
+                ft.DataCell(ft.Text(student["M_Tel"], size=TEXT_SIZE)),
             ]
         ) for i, student in enumerate(students)
     ]
