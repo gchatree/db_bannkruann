@@ -47,6 +47,24 @@ def open_pdf_receipt_no(rid):
     except Exception as e:
         print(f"Error: {e}")
 
+def open_excle_receipt_sum(filename):
+    ospth = os.getcwd()
+    pdf_path = f"{ospth}/{filename}"
+    try:
+        if sys.platform.startswith('win'):
+            # Windows
+            os.startfile(pdf_path)
+        elif sys.platform.startswith('darwin'):
+            # macOS
+            subprocess.call(('open', pdf_path))
+        elif sys.platform.startswith('linux'):
+            # Linux
+            subprocess.call(('xdg-open', pdf_path))
+        else:
+            print("Platform not supported")
+    except Exception as e:
+        print(f"Error: {e}")
+
 def max_id(data,id_name):
     maxitem = ""
     maxvalue=0

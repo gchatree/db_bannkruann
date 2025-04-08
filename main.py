@@ -6,6 +6,7 @@ import enroll_page
 import payment_page
 import bkn_fn
 import class_page
+import receipt_page
 
 
 def main(page: ft.Page):
@@ -35,6 +36,7 @@ def main(page: ft.Page):
         "Enroll": "ระบบจัดการข้อมูลและการเงิน : Enroll",
         "Payment": "ระบบจัดการข้อมูลและการเงิน : Payment",
         "Class Room": "ระบบจัดการข้อมูลและการเงิน : Class Room",
+        "Receipt": "ระบบจัดการข้อมูลและการเงิน : Receipt",
     }
     
     # Current page tracker
@@ -88,6 +90,8 @@ def main(page: ft.Page):
             return payment_page.containers(page)
         elif page_name == "ClassRoom":
              return class_page.containers(page)
+        elif page_name == "Receipt":
+             return receipt_page.containers(page)
 
     # Create content containers for each page
     home_content = create_page_content("Home")
@@ -96,11 +100,14 @@ def main(page: ft.Page):
     enroll_content = create_page_content("Enroll")
     payment_content = create_page_content("Payment")
     Class_Room_content = create_page_content("ClassRoom")
+    Receipt_content = create_page_content("Receipt")
+    
     
     # Container to hold the current page content
     content_container = ft.Container(
         expand=True,
-        content=home_content
+        content=home_content,
+        alignment=ft.alignment.top_center
     )
     
     # Function to change the current page
@@ -120,6 +127,8 @@ def main(page: ft.Page):
             content_container.content = payment_content
         elif page_name == "ClassRoom":
             content_container.content = ft.Column ([Class_Room_content],scroll='auto')
+        elif page_name == "Receipt":
+            content_container.content = ft.Column ([Receipt_content],scroll='auto')    
         for button in sidebar.content.controls[1:]:
             text = button.content.controls[1].value
             is_selected = text == page_name
@@ -183,6 +192,7 @@ def main(page: ft.Page):
                 create_menu_button(ft.Icons.APP_REGISTRATION, "Enroll"), 
                 create_menu_button(ft.Icons.CREDIT_CARD, "Payment"),
                 create_menu_button(ft.Icons.ROOM, "ClassRoom"),
+                create_menu_button(ft.Icons.RECEIPT_LONG_OUTLINED, "Receipt"),
             ]
         )
     )

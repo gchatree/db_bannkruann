@@ -53,14 +53,21 @@ def containers(page):
             first_of_last_month = last_day_of_last_month.replace(day=1)
             from_date.value = first_of_last_month.strftime("%Y-%m-%d")
             to_date.value = last_day_of_last_month.strftime("%Y-%m-%d")
-        
-        from_date.value = calendar.thaidate(from_date.value)
-        to_date.value = calendar.thaidate(to_date.value)
+        elif dropdownfilter.value == "All":
+            from_date.value = ""
+            to_date.value = ""
+            page.update()
+            #update_table(e)
+        if from_date.value != "":
+            from_date.value = calendar.thaidate(from_date.value)
+            to_date.value = calendar.thaidate(to_date.value)
         page.update()
+        update_table(e)
 
     dropdownfilter = ft.Dropdown(
         label="ช่วงเวลา",
         options=[
+            ft.dropdown.Option("All"),
             ft.dropdown.Option("today"),
             ft.dropdown.Option("this week"),
             ft.dropdown.Option("this month"),
@@ -115,7 +122,7 @@ def containers(page):
                     ft.DataCell(ft.Text(f'{item["Name"]} (น้อง {item["Nick"]})', size=TEXT_SIZE)),
                 ] + [
                     ft.DataCell(ft.Text(str(item[ptype]) if item[ptype] else "", 
-                                      text_align=ft.TextAlign.CENTER, size=TEXT_SIZE))
+                                    text_align=ft.TextAlign.CENTER, size=TEXT_SIZE))
                     for ptype in payment_types
                 ]
             ) for item in processed_data
@@ -129,31 +136,88 @@ def containers(page):
                 ft.DataCell(ft.Text("")),
             ] + [
                 ft.DataCell(ft.Text(str(sums[ptype]), text_align=ft.TextAlign.CENTER, 
-                                  size=TEXT_SIZE, weight=ft.FontWeight.BOLD))
+                                size=TEXT_SIZE, weight=ft.FontWeight.BOLD))
                 for ptype in payment_types
             ]
         )
         rows.append(summary_row)
 
-        # Total sum row without span
+        # Total sum row
         total_row = ft.DataRow(
             cells=[
                 ft.DataCell(ft.Text("ยอดรวมทั้งหมด", size=TEXT_SIZE, weight=ft.FontWeight.BOLD)),
-                ft.DataCell(ft.Text("")),  # Empty cell for Paid_Date
-                ft.DataCell(ft.Text("")),  # Empty cell for Name/Nick
+                ft.DataCell(ft.Text("")),
+                ft.DataCell(ft.Text("")),
             ] + [
                 ft.DataCell(ft.Text(str(total_sum) if i == len(payment_types) - 1 else "", 
-                                  text_align=ft.TextAlign.CENTER, size=TEXT_SIZE, 
-                                  weight=ft.FontWeight.BOLD))
+                                text_align=ft.TextAlign.CENTER, size=TEXT_SIZE, 
+                                weight=ft.FontWeight.BOLD))
                 for i in range(len(payment_types))
             ]
         )
         rows.append(total_row)
 
-        return ft.DataTable(
+        # Create the DataTable
+        table = ft.DataTable(
             column_spacing=50,
             columns=columns,
             rows=rows,
+        )
+
+
+        # Define the export function
+        def export_to_excel(e):
+            # Prepare data for Excel
+            excel_data = []
+            headers = ["เลขที่", "วันที่", "ชื่อนักเรียน"] + payment_types
+            
+            # Add data rows
+            for item in processed_data:
+                row = [
+                    item["R_ID"],
+                    item["Paid_Date"],
+                    f'{item["Name"]} (น้อง {item["Nick"]})'
+                ] + [item[ptype] if item[ptype] else "" for ptype in payment_types]
+                excel_data.append(row)
+            
+            # Add summary row
+            summary_row_data = ["รวม", "", ""] + [sums[ptype] for ptype in payment_types]
+            excel_data.append(summary_row_data)
+            
+            # Add total sum row
+            total_row_data = ["ยอดรวมทั้งหมด", "", ""] + [""] * (len(payment_types) - 1) + [total_sum]
+            excel_data.append(total_row_data)
+            
+            # Create DataFrame
+            df = pd.DataFrame(excel_data, columns=headers)
+            
+            # Save to Excel file
+            file_path = "receipt/export_receipt_sum.xlsx"
+            df.to_excel(file_path, index=False)
+            
+            # Open the file with Excel
+            bkn_fn.open_excle_receipt_sum(file_path)
+
+
+
+        # Add the "Export to Excel" button below the table
+        export_button = ft.ElevatedButton(
+            text="Export to Excel",
+            on_click=export_to_excel,
+            bgcolor=bkn_fn.navy_blue,
+            color=bkn_fn.yellow,
+        )
+
+        # Return a Column containing the table and the button
+        return ft.Column(
+            controls=[
+                table,
+                ft.Container(
+                    content=export_button,
+                    alignment=ft.alignment.center_right,  # Center the button
+                    padding=ft.padding.only(top=10)  # Add some space above the button
+                )
+            ]
         )
     
     table_container = ft.Container(content=build_table(filtered_data), expand=True)
@@ -193,7 +257,7 @@ def containers(page):
                            ft.IconButton(on_click=update_table, icon=ft.Icons.SEARCH, 
                                        bgcolor=bkn_fn.navy_blue, icon_color=bkn_fn.yellow)], 
                            spacing=10, alignment=ft.MainAxisAlignment.CENTER),
-                    ft.Column([table_container], scroll="auto", height=300),
+                    ft.Column([table_container], scroll="auto"),
                 ],
                 spacing=20,
                 scroll=ft.ScrollMode.AUTO,
@@ -208,7 +272,7 @@ def containers(page):
 def main(page: ft.Page):
     page.title = "Receipt Management"
     page.bgcolor = "#F5F5F5"
-    con = ft.Column([containers(page)], scroll='auto')
+    con = ft.Column([containers(page)], scroll='auto',height=500)
     page.add(con)
     page.scroll = True
 
