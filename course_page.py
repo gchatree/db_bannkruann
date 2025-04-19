@@ -5,29 +5,11 @@ import bkn_fn
 TEXT_SIZE = 14
 FIELD_HEIGHT = 40
 
-# Database function with error handling
-def Exec_Sql(sql):
-    try:
-        conn = sqlite3.connect("Bannkruann.db") 
-        c = conn.cursor()
-        c.execute(sql)
-        result = c.fetchall()
-        if len(result) > 0:
-            attb = [d[0] for d in c.description]
-            jsonlist = [dict(zip(attb, item)) for item in result]
-        else:
-            jsonlist = result
-        conn.commit()
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        jsonlist = []
-    finally:
-        conn.close()
-    return jsonlist
 
 def containers(page):
+    page.fonts = bkn_fn.pagefonts
     # Fetch initial data from database
-    course_data = Exec_Sql("SELECT * FROM Course ORDER BY ID DESC")
+    course_data = bkn_fn.Exec_Sql("SELECT * FROM Course ORDER BY ID DESC")
     
     # State variables
     editing_index = None
@@ -56,25 +38,27 @@ def containers(page):
     # Add new record function
     def save_new_record(e):
         nonlocal editing_index
-        max_id_result = Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
+        max_id_result = bkn_fn.Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
         max_id = max_id_result[0]["max_id"] if max_id_result and max_id_result[0]["max_id"] is not None else 0
         new_id = str(max_id + 1)
         
         new_record = {
             "ID": new_id,
             "C_ID": c_id_field.value,
+            "G_ID": g_id_field.value,
             "Class": class_field.value,
             "Day": day_field.value,
             "Period": period_field.value,
             "Subject": subject_field.value,
             "Cost": cost_field.value,
         }
-        sql = f"INSERT INTO Course (ID, C_ID, Class, Day, Period, Subject, Cost) VALUES ('{new_id}', '{new_record['C_ID']}', '{new_record['Class']}', '{new_record['Day']}', '{new_record['Period']}', '{new_record['Subject']}', '{new_record['Cost']}')"
-        Exec_Sql(sql)
+        sql = f"INSERT INTO Course (ID, C_ID, Class, Day, Period, Subject, Cost,G_ID) VALUES ('{new_id}', '{new_record['C_ID']}', '{new_record['Class']}', '{new_record['Day']}', '{new_record['Period']}', '{new_record['Subject']}', '{new_record['Cost']}', '{new_record['G_ID']}')"
+        bkn_fn.Exec_Sql(sql)
         
         course_data.insert(0, new_record)
         filtered_data.insert(0, new_record)
         c_id_field.value = ""
+        g_id_field.value = ""
         class_field.value = ""
         day_field.value = ""
         period_field.value = ""
@@ -110,8 +94,9 @@ def containers(page):
         filtered_data[index]["Period"] = table.rows[index].cells[3].content.value
         filtered_data[index]["Subject"] = table.rows[index].cells[4].content.value
         filtered_data[index]["Cost"] = table.rows[index].cells[5].content.value
-        sql = f"UPDATE Course SET C_ID = '{filtered_data[index]['C_ID']}', Class = '{filtered_data[index]['Class']}', Day = '{filtered_data[index]['Day']}', Period = '{filtered_data[index]['Period']}', Subject = '{filtered_data[index]['Subject']}', Cost = '{filtered_data[index]['Cost']}' WHERE ID = '{filtered_data[index]['ID']}'"
-        Exec_Sql(sql)
+        filtered_data[index]["G_ID"] = table.rows[index].cells[6].content.value
+        sql = f"UPDATE Course SET C_ID = '{filtered_data[index]['C_ID']}', Class = '{filtered_data[index]['Class']}', Day = '{filtered_data[index]['Day']}', Period = '{filtered_data[index]['Period']}', Subject = '{filtered_data[index]['Subject']}', Cost = '{filtered_data[index]['Cost']}',G_ID = '{filtered_data[index]['G_ID']}' WHERE ID = '{filtered_data[index]['ID']}'"
+        bkn_fn.Exec_Sql(sql)
         for i, item in enumerate(course_data):
             if item["ID"] == filtered_data[index]["ID"]:
                 course_data[i] = filtered_data[index].copy()
@@ -122,20 +107,20 @@ def containers(page):
     def delete_record(e, index):
         deleted_item = filtered_data.pop(index)
         sql = f"DELETE FROM Course WHERE ID = '{deleted_item['ID']}'"
-        Exec_Sql(sql)
+        bkn_fn.Exec_Sql(sql)
         course_data[:] = [item for item in course_data if item["ID"] != deleted_item["ID"]]
         refresh_table()
 
     def duplicate_record(e, index):
-        max_id_result = Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
+        max_id_result = bkn_fn.Exec_Sql("SELECT MAX(ID) as max_id FROM Course")
         max_id = max_id_result[0]["max_id"] if max_id_result and max_id_result[0]["max_id"] is not None else 0
         new_id = str(max_id + 1)
         
         new_record = filtered_data[index].copy()
         new_record["ID"] = new_id
         new_record["C_ID"] = f"{new_record['C_ID']}_COPY"
-        sql = f"INSERT INTO Course (ID, C_ID, Class, Day, Period, Subject, Cost) VALUES ('{new_id}', '{new_record['C_ID']}', '{new_record['Class']}', '{new_record['Day']}', '{new_record['Period']}', '{new_record['Subject']}', '{new_record['Cost']}')"
-        Exec_Sql(sql)
+        sql = f"INSERT INTO Course (ID, C_ID, Class, Day, Period, Subject, Cost,G_ID) VALUES ('{new_id}', '{new_record['C_ID']}', '{new_record['Class']}', '{new_record['Day']}', '{new_record['Period']}', '{new_record['Subject']}', '{new_record['Cost']}', '{new_record['G_ID']}')"
+        bkn_fn.Exec_Sql(sql)
         
         course_data.insert(0, new_record)
         filtered_data.insert(0, new_record)
@@ -153,6 +138,7 @@ def containers(page):
                 ft.DataColumn(ft.Text("ช่วงเวลา", size=TEXT_SIZE)),
                 ft.DataColumn(ft.Text("วิชา", size=TEXT_SIZE)),
                 ft.DataColumn(ft.Text("จำนวนเงิน", size=TEXT_SIZE)),
+                ft.DataColumn(ft.Text("กลุ่มคอร์ส", size=TEXT_SIZE)),
                 ft.DataColumn(ft.Row([ft.Text("    ", size=TEXT_SIZE),ft.Text("Actions", size=TEXT_SIZE,text_align=ft.TextAlign.CENTER)])),
             ],
             rows=[
@@ -164,6 +150,7 @@ def containers(page):
                         ft.DataCell(ft.TextField(value=item["Period"], text_size=TEXT_SIZE, height=FIELD_HEIGHT) if i == editing_index else ft.Text(item["Period"], size=TEXT_SIZE)),
                         ft.DataCell(ft.TextField(value=item["Subject"], text_size=TEXT_SIZE, height=FIELD_HEIGHT) if i == editing_index else ft.Text(item["Subject"], size=TEXT_SIZE)),
                         ft.DataCell(ft.TextField(value=item["Cost"], text_size=TEXT_SIZE, height=FIELD_HEIGHT) if i == editing_index else ft.Text(item["Cost"], size=TEXT_SIZE)),
+                        ft.DataCell(ft.TextField(value=item["G_ID"], text_size=TEXT_SIZE, height=FIELD_HEIGHT) if i == editing_index else ft.Text(item["G_ID"], size=TEXT_SIZE)),
                         ft.DataCell(
                             ft.Row(
                                 [
@@ -197,6 +184,7 @@ def containers(page):
 
     # Add new course fields with labels
     c_id_field = ft.TextField(label="C_ID", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    g_id_field = ft.TextField(label="G_ID", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
     class_field = ft.TextField(label="Class", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
     day_field = ft.TextField(label="Day", text_size=TEXT_SIZE, height=FIELD_HEIGHT, width=100)
     period_field = ft.TextField(label="Period", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
@@ -204,13 +192,14 @@ def containers(page):
     cost_field = ft.TextField(label="Cost", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
 
     # Add button and container
-    add_button = ft.ElevatedButton("Add Course", on_click=toggle_add_container, bgcolor=bkn_fn.navy_blue,icon=ft.icons.ADD ,icon_color=bkn_fn.yellow, color=bkn_fn.yellow, height=FIELD_HEIGHT)
+    add_button = ft.ElevatedButton("Add Course", on_click=toggle_add_container, bgcolor=bkn_fn.navy_blue,icon=ft.Icons.ADD ,icon_color=bkn_fn.yellow, color=bkn_fn.yellow)
     add_container = ft.Container(
         content=ft.Column(
             [
                 ft.Text("Add New Course", size=16),
                 ft.Row(
                     [
+                        g_id_field,
                         c_id_field,
                         class_field,
                         day_field,
@@ -222,7 +211,7 @@ def containers(page):
                         period_field,
                         subject_field,
                         cost_field,
-                        ft.ElevatedButton("Save",icon=ft.icons.SAVE,width=100,icon_color=bkn_fn.yellow , on_click=save_new_record, bgcolor=bkn_fn.navy_blue, color=bkn_fn.yellow, height=FIELD_HEIGHT),
+                        ft.ElevatedButton("Save",icon=ft.Icons.SAVE,width=100,icon_color=bkn_fn.yellow , on_click=save_new_record, bgcolor=bkn_fn.navy_blue, color=bkn_fn.yellow),
                     ],
                     spacing=10,
                 ),
@@ -253,7 +242,7 @@ def containers(page):
                         bgcolor=bkn_fn.navy_blue,
                         height=40,
                         content=ft.Row(
-                        [ft.Text("::: การจัดการคอร์สเรียน :::", color=bkn_fn.yellow, size=18)],
+                        [ft.Text("::: การจัดการคอร์สเรียน :::", color=bkn_fn.yellow, size=22,font_family=bkn_fn.menu_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),
@@ -263,6 +252,7 @@ def containers(page):
                 ],
                 spacing=20,
                 scroll=ft.ScrollMode.AUTO,
+                
             ),
         ),
         ft.Container(
@@ -272,7 +262,7 @@ def containers(page):
                         bgcolor=bkn_fn.yellow,
                         height=40,
                         content=ft.Row(
-                        [ft.Text("::: ข้อมูลคอร์สเรียน :::", color=bkn_fn.navy_blue, size=18)],
+                        [ft.Text("::: ข้อมูลคอร์สเรียน :::", color=bkn_fn.navy_blue, size=22,font_family=bkn_fn.menu_font)],
                         expand=True,
                         alignment=ft.MainAxisAlignment.CENTER,
                     ),
