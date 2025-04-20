@@ -22,7 +22,8 @@ def containers(page):
             s.Name, 
             s.Nick, 
             r.Cash, 
-            r.Amount
+            r.Amount,
+            r.RNote
         FROM 
             Receipt r
         JOIN 
@@ -82,7 +83,7 @@ def containers(page):
         payment_types = sorted(set(item["Cash"] for item in data))
         grouped_data = {}
         for item in data:
-            key = (item["R_ID"], item["Paid_Date"], item["Name"], item["Nick"])
+            key = (item["Paid_Date"],item["RNote"],  item["Name"], item["Nick"])
             if key not in grouped_data:
                 grouped_data[key] = {ptype: 0 for ptype in payment_types}
             amount = int(item["Amount"])  # Use float(item["Amount"]) if decimals are needed
@@ -90,8 +91,8 @@ def containers(page):
         
         processed_data = [
             {
-                "R_ID": key[0],
-                "Paid_Date": key[1],
+                "RNote": key[1],
+                "Paid_Date": key[0],
                 "Name": key[2],
                 "Nick": key[3],
                 **amounts
@@ -107,8 +108,8 @@ def containers(page):
         processed_data, payment_types, sums, total_sum = process_data_for_table(filtered_data)
         
         columns = [
-            ft.DataColumn(ft.Text("เลขที่", size=TEXT_SIZE)),
             ft.DataColumn(ft.Text("วันที่", size=TEXT_SIZE)),
+            ft.DataColumn(ft.Text("รายการ", size=TEXT_SIZE)),
             ft.DataColumn(ft.Text("ชื่อนักเรียน", size=TEXT_SIZE)),
         ] + [
             ft.DataColumn(ft.Text(ptype, size=TEXT_SIZE)) for ptype in payment_types
@@ -117,8 +118,8 @@ def containers(page):
         rows = [
             ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(item["R_ID"], size=TEXT_SIZE)),
-                    ft.DataCell(ft.Text(item["Paid_Date"], size=TEXT_SIZE)),
+                    ft.DataCell(ft.Text(calendar.thaidate(item["Paid_Date"]), size=TEXT_SIZE)),
+                    ft.DataCell(ft.Text(item["RNote"], size=TEXT_SIZE)),
                     ft.DataCell(ft.Text(f'{item["Name"]} (น้อง {item["Nick"]})', size=TEXT_SIZE)),
                 ] + [
                     ft.DataCell(ft.Text(str(item[ptype]) if item[ptype] else "", 
@@ -169,13 +170,13 @@ def containers(page):
         def export_to_excel(e):
             # Prepare data for Excel
             excel_data = []
-            headers = ["เลขที่", "วันที่", "ชื่อนักเรียน"] + payment_types
+            headers = ["วันที่", "รายการ", "ชื่อนักเรียน"] + payment_types
             
             # Add data rows
             for item in processed_data:
                 row = [
-                    item["R_ID"],
-                    item["Paid_Date"],
+                    calendar.thaidate(item["Paid_Date"]),
+                    item["RNote"],
                     f'{item["Name"]} (น้อง {item["Nick"]})'
                 ] + [item[ptype] if item[ptype] else "" for ptype in payment_types]
                 excel_data.append(row)
