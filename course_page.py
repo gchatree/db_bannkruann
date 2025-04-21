@@ -183,13 +183,13 @@ def containers(page):
         )
 
     # Add new course fields with labels
-    c_id_field = ft.TextField(label="C_ID", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
-    g_id_field = ft.TextField(label="G_ID", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
-    class_field = ft.TextField(label="Class", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
-    day_field = ft.TextField(label="Day", text_size=TEXT_SIZE, height=FIELD_HEIGHT, width=100)
-    period_field = ft.TextField(label="Period", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
-    subject_field = ft.TextField(label="Subject", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
-    cost_field = ft.TextField(label="Cost", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    c_id_field = ft.TextField(label="CourseName_ห้ามซ้ำ", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    g_id_field = ft.TextField(label="กลุ่มคอร์ส", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    class_field = ft.TextField(label="ห้องเรียน", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    day_field = ft.TextField(label="วันเรียน", text_size=TEXT_SIZE, height=FIELD_HEIGHT, width=100)
+    period_field = ft.TextField(label="ช่วงเวลา", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    subject_field = ft.TextField(label="วิชา", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
+    cost_field = ft.TextField(label="จำนวนเงิน", text_size=TEXT_SIZE, height=FIELD_HEIGHT, expand= True)
 
     # Add button and container
     add_button = ft.ElevatedButton("Add Course", on_click=toggle_add_container, bgcolor=bkn_fn.navy_blue,icon=ft.Icons.ADD ,icon_color=bkn_fn.yellow, color=bkn_fn.yellow)
