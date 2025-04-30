@@ -6,6 +6,7 @@ import calendar_utils as calendar
 import bkn_fn
 
 def containers(page):
+    page.fonts = bkn_fn.pagefonts
     # Define color scheme
     navy_blue = bkn_fn.navy_blue
     yellow = bkn_fn.yellow
@@ -277,7 +278,7 @@ def containers(page):
                             bgcolor=navy_blue,
                             height=40,
                             content=ft.Row(
-                                [ft.Text("::: ข้อมูลนักเรียน :::", color=yellow, size=18)],
+                                [ft.Text("::: ข้อมูลนักเรียน :::", color=yellow, size=22,font_family=bkn_fn.menu_font)],
                                 expand=True,
                                 alignment=ft.MainAxisAlignment.CENTER
                             )
@@ -316,7 +317,7 @@ def containers(page):
                             bgcolor=yellow,
                             height=40,
                             content=ft.Row(
-                                [ft.Text("::: การชำระเงิน :::", color=navy_blue, size=18)],
+                                [ft.Text("::: การชำระเงิน :::", color=navy_blue, size=22,font_family=bkn_fn.menu_font)],
                                 expand=True,
                                 alignment=ft.MainAxisAlignment.CENTER
                             )

@@ -5,7 +5,9 @@ import student_page
 import bkn_fn
 import payment_page
 
-def containers(page):
+def containers(page,cur_stu_id):
+
+    page.fonts = bkn_fn.pagefonts
     # Define color scheme
     navy_blue = bkn_fn.navy_blue
     yellow = bkn_fn.yellow
@@ -20,9 +22,15 @@ def containers(page):
     # Fetch student and course data
     student_sql = "SELECT S_ID, Name, SurName, Nick FROM Student ORDER BY S_ID DESC"
     student_data = bkn_fn.Exec_Sql(student_sql)
-    last_student = bkn_fn.max_id(student_data, "S_ID") if student_data else None
+    last_student = student_data
+    if cur_stu_id[0] == 1 :
+        last_student = bkn_fn.max_id(student_data, "S_ID") if student_data else None
+    else :
+        sql = f'SELECT S_ID, Name, SurName, Nick FROM Student WHERE S_ID = "{cur_stu_id[0]}"'
+        result_sql = bkn_fn.Exec_Sql(sql)
+        last_student = result_sql[0]
 
-    course_sql = "SELECT C_ID, Class, Day, Period, Subject, Cost FROM Course ORDER BY C_ID"
+    course_sql = "SELECT C_ID, Class, Day, Period, Subject, Cost, G_ID FROM Course ORDER BY C_ID"
     course_data = bkn_fn.Exec_Sql(course_sql)
     filtered_course_data = course_data.copy()
 
@@ -46,6 +54,7 @@ def containers(page):
         on_change=lambda e: update_search_results(e.control.value)
     )
     search_results = ft.Column(visible=False, scroll="auto", height=150)
+
 
     # Dropdowns for filtering
     class_options = sorted(list(set(course["Class"] for course in course_data if course["Class"])))
@@ -148,6 +157,7 @@ def containers(page):
         page.update()
 
     def select_student(s_id):
+        cur_stu_id[0]=s_id
         selected_student = next((s for s in student_data if s["S_ID"] == s_id), None)
         if selected_student:
             student_id_text.value = str(selected_student["S_ID"])
@@ -226,13 +236,14 @@ def containers(page):
         else:
             selected_cid.value = ""
         formatted_course_info = format_subjects([
-            f'"ห้อง": "{course["Class"]}", "รอบวัน": "{course["Day"]}", "วิชา": "{course["Subject"]}"'
+            f'"ห้อง": "{course["Class"]}", "รอบวัน": "{course["Day"]}", "วิชา": "{course["Subject"]}", "คอร์ส": "{course["G_ID"]}"'
             for course in selected_courses
         ])
         selected_courses_info.value = formatted_course_info if formatted_course_info else ""
         apply_discount()
         page.update()
 
+    
     def format_subjects(subjects):
         data = {}
         for subject in subjects:
@@ -240,20 +251,31 @@ def containers(page):
             room = subject_dict["ห้อง"]
             day = subject_dict["รอบวัน"]
             subject_name = subject_dict["วิชา"]
-            if room not in data:
-                data[room] = {}
-            if day not in data[room]:
-                data[room][day] = []
-            if subject_name not in data[room][day]:
-                data[room][day].append(subject_name)
+            group_name = subject_dict["คอร์ส"]
+            
+            # Create nested structure: group_name -> room -> day -> subjects
+            if group_name not in data:
+                data[group_name] = {}
+            if room not in data[group_name]:
+                data[group_name][room] = {}
+            if day not in data[group_name][room]:
+                data[group_name][room][day] = []
+            if subject_name not in data[group_name][room][day]:
+                data[group_name][room][day].append(subject_name)
+        
         result = ""
-        for room in sorted(data.keys()):
-            room_text = f'ห้อง {room} '
-            for day in sorted(data[room].keys()):
-                subjects = "-".join(data[room][day])
-                day_text = f'รอบวัน {day} วิชา {subjects} : '
-                result += room_text + day_text
-                room_text = ""
+        # Loop through the hierarchy: group_name -> room -> day -> subjects
+        for group in sorted(data.keys()):
+            group_text = f'{group}##'
+            for room in sorted(data[group].keys()):
+                room_text = f'ห้อง {room} '
+                for day in sorted(data[group][room].keys()):
+                    subjects = "-".join(data[group][room][day])
+                    day_text = f'รอบวัน {day} วิชา {subjects} : '
+                    result += group_text + room_text + day_text
+                    room_text = ""
+                    group_text = ""
+        
         return result.strip(" :")
 
     def apply_discount():
@@ -315,6 +337,7 @@ def containers(page):
     # Initial table population
     filter_courses()
 
+    
     # Main UI layout
     ui = ft.Column(
         controls=[
@@ -325,13 +348,13 @@ def containers(page):
                     spacing=0,
                     controls=[
                         ft.Container(
-                            height=40,
-                            padding=ft.padding.only(10, 10, 10, 10),
+                            #height=40,
+                            #padding=ft.padding.only(10, 10, 10, 10),
                             bgcolor=navy_blue,
                             content=ft.Column(
                                 spacing=0,
                                 controls=[ft.Row(
-                                    [ft.Text(":::  เลือกคอร์ส  :::", color=yellow, size=18)],
+                                    [ft.Text(":::  เลือกคอร์ส  :::", color=yellow, size=22,font_family=bkn_fn.menu_font)],
                                     alignment=ft.MainAxisAlignment.CENTER
                                 )]
                             )
@@ -375,12 +398,12 @@ def containers(page):
                     controls=[
                         ft.Container(
                             bgcolor=yellow,
-                            height=40,
-                            padding=ft.padding.only(10, 0, 10, 10),
+                            # height=40,
+                            # padding=ft.padding.only(10, 0, 10, 10),
                             content=ft.Column(
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 controls=[ft.Row(
-                                    [ft.Text(":::: ข้อมูลการชำระเงิน ::::", expand=True, size=18, text_align="center")]
+                                    [ft.Text(":::: ข้อมูลการชำระเงิน ::::", expand=True, size=22,font_family=bkn_fn.menu_font, text_align="center")]
                                 )]
                             )
                         ),

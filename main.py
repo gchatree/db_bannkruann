@@ -5,7 +5,8 @@ import course_page
 import enroll_page
 import payment_page
 import bkn_fn
-# import receipt_page
+import class_page
+import receipt_page
 
 
 def main(page: ft.Page):
@@ -19,18 +20,10 @@ def main(page: ft.Page):
     page.window.center()
 
     # Font definitions - register Thai fonts from assets/fonts folder
-    page.fonts = {
-        "THNiramit": "fonts/TH Niramit AS.ttf",
-        "THFahkwang": "fonts/TH Fahkwang.ttf",
-        "THK2DJuly8": "fonts/TH K2D July8.ttf",
-        "THMaliGrade6": "fonts/TH Mali Grade6.ttf",
-        "THSarabun": "fonts/THSarabun.ttf",
-        "Charmonman": "fonts/Charmonman-Regular.ttf"
-    }
-    
+    page.fonts = bkn_fn.pagefonts
+    page.theme = ft.Theme(font_family=bkn_fn.Normal_font)  
     # Choose which font to use for Thai text
-    menu_font = "THFahkwang"
-    btn_font = "THSarabun"
+
     # Local image path
     path = os.path.abspath('')
     logo_path = "/images/bannAnn.png"
@@ -42,11 +35,14 @@ def main(page: ft.Page):
         "Courses": "ระบบจัดการข้อมูลและการเงิน : Courses",
         "Enroll": "ระบบจัดการข้อมูลและการเงิน : Enroll",
         "Payment": "ระบบจัดการข้อมูลและการเงิน : Payment",
+        "Class Room": "ระบบจัดการข้อมูลและการเงิน : Class Room",
         "Receipt": "ระบบจัดการข้อมูลและการเงิน : Receipt",
     }
     
     # Current page tracker
     current_page = "Home"
+    cur_stu_id = [0]
+    cur_stu_id[0] = 1
     
     # Function to create content for different pages
     def create_page_content(page_name):
@@ -63,12 +59,14 @@ def main(page: ft.Page):
                             size=24,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
+                            font_family= bkn_fn.Header_font,
                         ),
                         ft.Text(
                             english_subtitle,
                             size=32,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
+                            font_family= bkn_fn.Header_font,
                         ),
                         ft.Container(height=40),
                         ft.Container(
@@ -83,15 +81,17 @@ def main(page: ft.Page):
                 )
             )
         elif page_name == "Students":
-            return student_page.containers(page)
+            return student_page.containers(page,cur_stu_id)
         elif page_name == "Courses":
             return course_page.containers(page)
         elif page_name == "Enroll":
-            return enroll_page.containers(page)
+            return enroll_page.containers(page,cur_stu_id)
         elif page_name == "Payment":
             return payment_page.containers(page)
-        # elif page_name == "Receipt":
-        #     return 
+        elif page_name == "ClassRoom":
+             return class_page.containers(page)
+        elif page_name == "Receipt":
+             return receipt_page.containers(page)
 
     # Create content containers for each page
     home_content = create_page_content("Home")
@@ -99,12 +99,15 @@ def main(page: ft.Page):
     courses_content = create_page_content("Courses")
     enroll_content = create_page_content("Enroll")
     payment_content = create_page_content("Payment")
-    receipt_content = create_page_content("Receipt")
+    Class_Room_content = create_page_content("ClassRoom")
+    Receipt_content = create_page_content("Receipt")
+    
     
     # Container to hold the current page content
     content_container = ft.Container(
         expand=True,
-        content=home_content
+        content=home_content,
+        alignment=ft.alignment.top_center
     )
     
     # Function to change the current page
@@ -115,22 +118,24 @@ def main(page: ft.Page):
         if page_name == "Home":
             content_container.content = home_content
         elif page_name == "Students":
-            content_container.content = students_content
+            content_container.content = ft.Column ([students_content],scroll='auto')
         elif page_name == "Courses":
             content_container.content = courses_content
         elif page_name == "Enroll":
-            content_container.content = enroll_content
+            content_container.content = enroll_page.containers(page,cur_stu_id)
         elif page_name == "Payment":
             content_container.content = payment_content
+        elif page_name == "ClassRoom":
+            content_container.content = ft.Column ([Class_Room_content],scroll='auto')
         elif page_name == "Receipt":
-            content_container.content = receipt_content
+            content_container.content = ft.Column ([Receipt_content],scroll='auto')    
         for button in sidebar.content.controls[1:]:
             text = button.content.controls[1].value
             is_selected = text == page_name
             button.bgcolor = bkn_fn.yellow if is_selected else "transparent"
             button.content.controls[0].color = bkn_fn.navy_blue if is_selected else bkn_fn.yellow
             button.content.controls[1].color = bkn_fn.navy_blue if is_selected else bkn_fn.yellow
-        
+            page.title = f'Student Information and Financial Management : {cur_stu_id[0]}'
         page.update()
     
     
@@ -177,7 +182,7 @@ def main(page: ft.Page):
                             "โรงเรียนกวดวิชาบ้านครูแอน",
                             color="white",
                             size=20,
-                            font_family=menu_font,
+                            font_family=bkn_fn.menu_font,
                         )
                     ])
                 ),
@@ -186,7 +191,8 @@ def main(page: ft.Page):
                 create_menu_button(ft.Icons.SCHOOL, "Courses"),
                 create_menu_button(ft.Icons.APP_REGISTRATION, "Enroll"), 
                 create_menu_button(ft.Icons.CREDIT_CARD, "Payment"),
-                create_menu_button(ft.Icons.RECEIPT, "Receipt"),
+                create_menu_button(ft.Icons.ROOM, "ClassRoom"),
+                create_menu_button(ft.Icons.RECEIPT_LONG_OUTLINED, "Receipt"),
             ]
         )
     )
